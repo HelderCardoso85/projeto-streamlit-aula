@@ -1,8 +1,8 @@
 import pandas as pd
 import scipy.stats
 import streamlit as st
-import time
 
+# Inicialização das variáveis de estado (session state)
 if 'experiment_no' not in st.session_state:
     st.session_state['experiment_no'] = 0
 
@@ -13,12 +13,11 @@ if 'df_experiment_results' not in st.session_state:
 
 st.header('Jogando uma moeda')
 
-chart = st.line_chart([0.5])
-
+# Função que simula o lançamento de moedas e calcula as médias acumuladas
 def toss_coin(n):
     trial_outcomes = scipy.stats.bernoulli.rvs(p=0.5, size=n)
     
-    mean = None
+    means = []
     outcome_no = 0
     outcome_1_count = 0
     
@@ -26,23 +25,25 @@ def toss_coin(n):
         outcome_no += 1
         if r == 1:
             outcome_1_count += 1
-        mean = outcome_1_count / outcome_no
-        # Passamos um DataFrame para o add_rows
-        chart.add_rows(pd.DataFrame([mean]))
-        time.sleep(0.05)
+        means.append(outcome_1_count / outcome_no)
         
-    return mean
+    # Desenha o gráfico de linha com a evolução das médias
+    st.line_chart(means)
+    
+    # Retorna a média final
+    return means[-1]
 
+# Controlo deslizante e botão
 number_of_trials = st.slider('Número de tentativas?', 1, 1000, 10)
 start_button = st.button('Executar')
 
-
+# Lógica ao clicar no botão Executar
 if start_button:
     st.write(f'Executando o experimento de {number_of_trials} tentativas.')
     st.session_state['experiment_no'] += 1
     mean = toss_coin(number_of_trials)
     
-
+    # Adiciona o resultado à tabela acumulativa
     st.session_state['df_experiment_results'] = pd.concat([
         st.session_state['df_experiment_results'],
         pd.DataFrame(
@@ -54,4 +55,5 @@ if start_button:
     st.session_state['df_experiment_results'] = \
         st.session_state['df_experiment_results'].reset_index(drop=True)
 
+# Exibe a tabela com o histórico de resultados
 st.write(st.session_state['df_experiment_results'])
