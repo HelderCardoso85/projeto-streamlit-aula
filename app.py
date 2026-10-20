@@ -27,7 +27,7 @@ def toss_coin(n):
         if r == 1:
             outcome_1_count += 1
         mean = outcome_1_count / outcome_no
-        chart.add_rows([mean])
+        chart.add_rows(pd.DataFrame([mean]))
         time.sleep(0.05)
 
     return mean
