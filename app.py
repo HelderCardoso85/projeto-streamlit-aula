@@ -1,6 +1,7 @@
 import pandas as pd
 import scipy.stats
 import streamlit as st
+import time
 
 # Inicialização das variáveis de estado (session state)
 if 'experiment_no' not in st.session_state:
@@ -13,11 +14,14 @@ if 'df_experiment_results' not in st.session_state:
 
 st.header('Jogando uma moeda')
 
-# Função que simula o lançamento de moedas e calcula as médias acumuladas
+# Gráfico de linhas com valor inicial
+chart = st.line_chart([0.5])
+
+# Função que simula o lançamento e calcula a média acumulada
 def toss_coin(n):
     trial_outcomes = scipy.stats.bernoulli.rvs(p=0.5, size=n)
     
-    means = []
+    mean = None
     outcome_no = 0
     outcome_1_count = 0
     
@@ -25,13 +29,11 @@ def toss_coin(n):
         outcome_no += 1
         if r == 1:
             outcome_1_count += 1
-        means.append(outcome_1_count / outcome_no)
+        mean = outcome_1_count / outcome_no
+        chart.add_rows(pd.DataFrame([mean]))
+        time.sleep(0.05)
         
-    # Desenha o gráfico de linha com a evolução das médias
-    st.line_chart(means)
-    
-    # Retorna a média final
-    return means[-1]
+    return mean
 
 # Controlo deslizante e botão
 number_of_trials = st.slider('Número de tentativas?', 1, 1000, 10)
